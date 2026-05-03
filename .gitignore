@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Secrets & local config
+*.docx
+
+# Claude
+.claude/
+CLAUDE.md
+claude files/
+.claudeignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Data (not code)
+data/manual/
+data/processed/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# OS
+.DS_Store
