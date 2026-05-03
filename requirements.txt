@@ -1,0 +1,35 @@
+# Web Framework
+fastapi==0.128.8
+uvicorn[standard]==0.39.0
+
+# Scheduling
+apscheduler==3.11.2
+
+# HTTP Client
+httpx==0.28.1
+
+# Data Processing
+pandas==2.3.3
+
+# Database
+psycopg2-binary==2.9.12
+
+# AI / LLM
+anthropic==0.97.0
+
+# Data Validation & Settings
+pydantic==2.13.3
+pydantic-settings==2.11.0
+
+# Observability
+prometheus-client==0.25.0
+
+# Environment
+python-dotenv==1.2.1
+
+# Dev / CI
+ruff==0.15.12
+mypy==1.19.1
+pytest==8.4.2
+pytest-asyncio==1.2.0
+types-psycopg2==2.9.21.20251012
