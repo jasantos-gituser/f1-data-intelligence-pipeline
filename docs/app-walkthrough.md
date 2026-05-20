@@ -3,6 +3,8 @@
 How data moves from the OpenF1 API all the way to a race winner prediction.
 Uses 2024 Season, Round 5 (Chinese GP) as the completed race, and Round 6 (Miami GP) as the race being predicted.
 
+> **Session scope:** The pipeline ingests a rolling 3-year window — from `max(2023, current_year - 3)` through the current year. In 2026 this means 2023–2026; in 2027 it becomes 2024–2027, and so on. This ensures the latest race (even from last week) is always included without manual config changes. Only `session_type=Race` sessions are fetched — practice and qualifying sessions are excluded.
+
 ---
 
 ## Big Picture: What the Two Endpoints Do
@@ -39,12 +41,15 @@ pipeline.py
      │
      ├─ openf1_loader.py
      │    Calls OpenF1 API for each endpoint:
-     │    GET /sessions?year=2024
-     │    GET /drivers?session_key=9158
-     │    GET /laps?session_key=9158
-     │    GET /pit?session_key=9158
-     │    GET /position?session_key=9158
-     │    GET /weather?session_key=9158
+     │    GET /sessions?year=2023&session_type=Race  ┐
+     │    GET /sessions?year=2024&session_type=Race  │ rolling 3-year window
+     │    GET /sessions?year=2025&session_type=Race  │ (years computed at runtime,
+     │    GET /sessions?year=2026&session_type=Race  ┘  floor = 2023)
+     │    GET /drivers?session_key=<key>
+     │    GET /laps?session_key=<key>
+     │    GET /pit?session_key=<key>
+     │    GET /position?session_key=<key>
+     │    GET /weather?session_key=<key>
      │    (sleep 0.25s between each call)
      │
      ├─ csv_loader.py
