@@ -98,6 +98,8 @@ Response includes: `predicted_winner`, `confidence` (high/medium/low), `reasonin
 
 **OpenF1 API** — primary source for 2023–present. No authentication required. Key endpoints: `/sessions`, `/drivers`, `/laps`, `/position`, `/pit`, `/weather`.
 
+The pipeline fetches a rolling 3-year window: `range(max(2023, current_year - 3), current_year + 1)`. In 2026 this is 2023–2026; in 2027 it becomes 2024–2027. The window shifts automatically each year, so the latest race weekend is always included. Only `session_type=Race` sessions are loaded — practice and qualifying are excluded to keep raw table volume manageable.
+
 **CSV fallback** — for pre-2023 historical data. Drop files in `/data/manual/`. Auto-detected on every `/ingest` call. Moved to `/data/processed/` after successful load (prevents re-ingestion).
 
 Both loaders expose the same interface — the pipeline orchestrator doesn't care which source is used.
@@ -112,6 +114,7 @@ f1-data-intelligence-pipeline/
 │   └── f1_pipeline/
 │       ├── api.py               # FastAPI app + lifespan
 │       ├── auth.py              # APIKeyHeader dependency
+│       ├── config.py            # Env var loading + validation (dotenv + Config class)
 │       ├── pipeline.py          # ELT orchestrator
 │       ├── scheduler.py         # APScheduler jobs
 │       ├── db.py                # Supabase connection + shared queries
