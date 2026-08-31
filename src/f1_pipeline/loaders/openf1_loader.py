@@ -1,8 +1,7 @@
 import asyncio
 import logging
-from typing import Any
-
 import httpx
+from typing import Any
 
 from f1_pipeline.config import Config
 
@@ -12,26 +11,32 @@ _MAX_RETRIES = 3
 
 async def fetch_session(
     config: Config,
-    session_key: int | str,
-    driver_number: int | None = None,
+    session_year: int | None = None,
 ) -> list[dict[str, Any]]:
-    """Fetch driver records from OpenF1 API for a given session."""
-    params: dict[str, Any] = {"session_key": session_key}
-    if driver_number is not None:
-        params["driver_number"] = driver_number
+    """Fetch session records from OpenF1 API for a given year."""
+    params: dict[str, Any] = {"year": session_year}
 
-    url = f"{config.openf1_base_url}/drivers"
-    return await _get(config, url, params)
+    url = f"{config.openf1_base_url}/sessions"
+    sessions = await _get(config, url, params)
+
+    all_drivers: list[dict[str, Any]] = []
+    for session in sessions:
+        session_key = session["session_key"]
+        drivers = await fetch_drivers(config, session_key)
+        all_drivers.extend(drivers)
+        await asyncio.sleep(0.25)
+
+    return all_drivers
 
 async def fetch_drivers(
     config: Config,
     session_key: int | str,
-    driver_number: int | None = None,
+    #driver_number: int | None = None,
 ) -> list[dict[str, Any]]:
     """Fetch driver records from OpenF1 API for a given session."""
     params: dict[str, Any] = {"session_key": session_key}
-    if driver_number is not None:
-        params["driver_number"] = driver_number
+    #if driver_number is not None:
+    #    params["driver_number"] = driver_number
 
     url = f"{config.openf1_base_url}/drivers"
     return await _get(config, url, params)
@@ -50,6 +55,9 @@ async def _get(
         for attempt in range(1, _MAX_RETRIES + 1):
             try:
                 resp = await client.get(url, params=params)
+                if resp.status_code == 404:
+                    logger.info("GET %s → 404 no results", url)
+                    return []
                 resp.raise_for_status()
                 result: list[dict[str, Any]] = resp.json()
                 logger.info("GET %s → %d records", url, len(result))
